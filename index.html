@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#14112b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>ตัวแฝง — เกมทายคำหาคนใน</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#14112b;--bg2:#1f1a40;--card:#2a2456;--line:#3d3577;
+  --text:#f3f0ff;--mute:#a59fd0;--acc:#ffcc33;--good:#3ddc97;--bad:#ff5c7a;--blue:#5cb8ff;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%}
+body{background:radial-gradient(1200px 600px at 50% -10%,#2d2466,var(--bg));color:var(--text);
+  font-family:'Prompt',system-ui,sans-serif;min-height:100dvh;overscroll-behavior:none;user-select:none;-webkit-user-select:none}
+#app{max-width:480px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;
+  padding:calc(16px + env(safe-area-inset-top)) 16px calc(20px + env(safe-area-inset-bottom))}
+h1{font-size:2.4rem;margin:.2em 0 0;font-weight:800;letter-spacing:.02em;text-align:center}
+h1 span{color:var(--acc)}
+h2{font-size:1.4rem;margin:.3em 0 .6em;text-align:center}
+p{line-height:1.55}
+.sub{color:var(--mute);text-align:center;margin:.2em 0 1.2em}
+.grow{flex:1}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:14px}
+.btn{display:block;width:100%;border:0;border-radius:16px;padding:16px;font:600 1.15rem 'Prompt',sans-serif;
+  background:var(--acc);color:#1a1530;margin-top:10px;cursor:pointer;transition:transform .08s}
+.btn:active{transform:scale(.97)}
+.btn.ghost{background:transparent;color:var(--text);border:1.5px solid var(--line)}
+.btn.good{background:var(--good)}
+.btn.bad{background:var(--bad);color:#fff}
+.btn:disabled{opacity:.4}
+.row{display:flex;gap:10px}.row>*{flex:1}
+input[type=text]{width:100%;padding:13px 14px;border-radius:12px;border:1.5px solid var(--line);background:var(--bg2);
+  color:var(--text);font:1.05rem 'Prompt',sans-serif;outline:none}
+input[type=text]:focus{border-color:var(--acc)}
+.plist{list-style:none;padding:0;margin:0 0 10px}
+.plist li{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid var(--line)}
+.plist li:last-child{border:0}
+.av{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:800;color:#1a1530;flex:none}
+.plist .x{margin-left:auto;background:none;border:0;color:var(--mute);font-size:1.4rem;padding:4px 10px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:9px 14px;border-radius:999px;border:1.5px solid var(--line);background:var(--bg2);color:var(--text);
+  font:1rem 'Prompt',sans-serif}
+.chip.on{background:var(--acc);color:#1a1530;border-color:var(--acc);font-weight:600}
+.lbl{font-size:.9rem;color:var(--mute);margin:0 0 8px}
+.stepper{display:flex;align-items:center;justify-content:space-between}
+.stepper b{font-size:1.4rem}
+.stepper button{width:46px;height:46px;border-radius:12px;border:1.5px solid var(--line);background:var(--bg2);
+  color:var(--text);font-size:1.5rem}
+.big{font-size:3rem;font-weight:800;text-align:center;margin:.1em 0}
+.role{border-radius:24px;padding:28px 18px;text-align:center;margin:10px 0}
+.role .ic{font-size:4rem}
+.role .nm{font-size:1.9rem;font-weight:800;margin:.1em 0}
+.role .word{font-size:2.3rem;font-weight:800;background:#0006;border-radius:14px;padding:10px;margin:14px 0 4px}
+.r-master{background:linear-gradient(160deg,#2f7bd8,#1d3f8c)}
+.r-insider{background:linear-gradient(160deg,#e0325a,#6d1236)}
+.r-common{background:linear-gradient(160deg,#2aa876,#13533c)}
+.hold{height:220px;border-radius:24px;border:2px dashed var(--line);display:grid;place-items:center;text-align:center;
+  color:var(--mute);background:var(--bg2);touch-action:none}
+.hold.active{border-color:var(--acc)}
+.timer{font-size:5.5rem;font-weight:800;text-align:center;font-variant-numeric:tabular-nums;margin:.1em 0;line-height:1}
+.timer.warn{color:var(--bad);animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.5}}
+.bar{height:10px;background:var(--bg2);border-radius:99px;overflow:hidden;margin:10px 0 18px}
+.bar i{display:block;height:100%;background:var(--acc);transition:width .3s linear}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pick{padding:14px 8px;border-radius:14px;border:1.5px solid var(--line);background:var(--bg2);color:var(--text);
+  font:600 1.05rem 'Prompt',sans-serif;display:flex;flex-direction:column;align-items:center;gap:6px}
+.pick.on{border-color:var(--acc);background:#ffcc3322}
+.pick .cnt{font-size:.85rem;color:var(--mute)}
+.pill{display:inline-block;padding:4px 10px;border-radius:99px;font-size:.85rem;background:var(--bg2);border:1px solid var(--line)}
+.center{text-align:center}
+.score li{justify-content:space-between}
+.hint{font-size:.9rem;color:var(--mute)}
+.win{font-size:2rem;font-weight:800;text-align:center;margin:.2em 0}
+.fade{animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1}}
+.toprow{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.icbtn{background:none;border:0;color:var(--mute);font:1rem 'Prompt',sans-serif;padding:6px}
+details summary{cursor:pointer;color:var(--acc);font-weight:600}
+ol{padding-left:1.2em;margin:.5em 0}ol li{margin:.35em 0;line-height:1.5}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+// ===== Word bank =====
+const WORDS = {
+  'สัตว์':['ช้าง','ยีราฟ','เพนกวิน','จระเข้','ปลาวาฬ','ผีเสื้อ','กระต่าย','นกฮูก','ม้าลาย','แมงมุม','ปลาโลมา','เต่า','จิงโจ้','หมีแพนด้า','งู','ไก่','ยุง','ปลาหมึก','อูฐ','ค้างคาว','ฮิปโป','แรด','กิ้งก่า','หอยทาก','ปลาฉลาม','นกแก้ว','สิงโต','ลิง','วัว','หมู'],
+  'อาหาร':['ส้มตำ','ต้มยำกุ้ง','ผัดไทย','ข้าวมันไก่','พิซซ่า','ซูชิ','ไอศกรีม','ข้าวเหนียวมะม่วง','หมูกระทะ','ชาไข่มุก','ป๊อปคอร์น','แฮมเบอร์เกอร์','ทุเรียน','ก๋วยเตี๋ยว','บะหมี่กึ่งสำเร็จรูป','ไข่เจียว','โจ๊ก','ช็อกโกแลต','กล้วยทอด','ขนมจีน','ปาท่องโก๋','ลูกชิ้นปิ้ง','เค้กวันเกิด','สเต๊ก','แตงโม','กาแฟ','สุกี้','ข้าวผัด','ไก่ทอด','มาม่า'],
+  'สิ่งของ':['ร่ม','แว่นตา','โทรศัพท์มือถือ','กรรไกร','ไมโครเวฟ','แปรงสีฟัน','กุญแจ','นาฬิกาปลุก','หมอน','กระจก','ลูกโป่ง','เทียนไข','รีโมททีวี','พัดลม','ไม้กวาด','กระเป๋าเป้','ดินสอ','ตู้เย็น','หูฟัง','รองเท้าแตะ','เครื่องซักผ้า','ปลั๊กไฟ','ไฟฉาย','กล้องถ่ายรูป','ถุงเท้า','ช้อน','ผ้าห่ม','ไดร์เป่าผม','ลูกฟุตบอล','กีตาร์'],
+  'สถานที่':['โรงพยาบาล','สนามบิน','ชายหาด','โรงหนัง','ห้างสรรพสินค้า','วัด','สวนสัตว์','ห้องสมุด','ร้านสะดวกซื้อ','ตลาดน้ำ','สถานีรถไฟ','โรงเรียน','ฟิตเนส','สวนสนุก','ภูเขา','ร้านตัดผม','ปั๊มน้ำมัน','ธนาคาร','คาราโอเกะ','สระว่ายน้ำ','อวกาศ','ทะเลทราย','ป่าดงดิบ','พิพิธภัณฑ์','สนามฟุตบอล','ร้านกาแฟ','ห้องครัว','ลิฟต์','ห้องน้ำ','เกาะ'],
+  'อาชีพ':['หมอ','ตำรวจ','นักบินอวกาศ','เชฟ','ครู','นักดับเพลิง','ช่างตัดผม','ทนายความ','ยูทูบเบอร์','นักบิน','ชาวนา','หมอฟัน','ไรเดอร์ส่งอาหาร','นักร้อง','โปรแกรมเมอร์','สัตวแพทย์','พยาบาล','นักมายากล','ทหาร','ช่างภาพ','นักข่าว','พนักงานต้อนรับบนเครื่องบิน','วินมอเตอร์ไซค์','นักมวย','ชาวประมง','นักบัญชี','ไกด์','ช่างไฟ','ดีเจ','นักฟุตบอล'],
+  'ทั่วไป':['สงกรานต์','รุ้งกินน้ำ','ฟ้าผ่า','ความฝัน','วันเกิด','งานแต่งงาน','รถติด','ไวไฟ','เซลฟี่','ปีใหม่','ภูเขาไฟ','หิมะ','จันทร์เพ็ญ','ไดโนเสาร์','หุ่นยนต์','ผี','ซุปเปอร์ฮีโร่','สอบ','ลอยกระทง','เงินเดือน','ไฟดับ','แผ่นดินไหว','ดาวตก','ป้ายรถเมล์','เวทมนตร์','สมาร์ทวอทช์','ปาร์ตี้','ทีวี','อินเทอร์เน็ต','จดหมายรัก']
+};
+const COLORS=['#ffcc33','#5cb8ff','#3ddc97','#ff8a5c','#c48bff','#ff6fae','#7ee0e0','#f4f186','#b4e06e','#ffa3a3','#9fb7ff','#ffd28a'];
+const ROLE={
+  master:{nm:'ผู้คุมเกม',ic:'👑',cls:'r-master',desc:'คุณรู้คำลับ ตอบคำถามได้แค่ "ใช่ / ไม่ใช่ / ไม่รู้" เท่านั้น บอกตัวเองให้ทุกคนรู้ได้เลย'},
+  insider:{nm:'ตัวแฝง',ic:'🕵️',cls:'r-insider',desc:'คุณรู้คำลับเหมือนกัน! แอบชี้นำให้ทุกคนทายถูกภายในเวลา โดยไม่ให้ใครจับได้'},
+  common:{nm:'ชาวบ้าน',ic:'🙋',cls:'r-common',desc:'คุณไม่รู้คำลับ ถามคำถามใช่/ไม่ใช่เพื่อทายคำให้ทัน แล้วจับตัวแฝงให้ได้'}
+};
+
+// ===== State =====
+const LS='tuafaeng_v1';
+let S = load() || {players:[],minutes:5,cats:['สัตว์','อาหาร','สิ่งของ','สถานที่'],scores:{},masterIdx:-1,used:[]};
+let G = null; // current round
+let tick=null, wakeLock=null;
+function load(){try{return JSON.parse(localStorage.getItem(LS))}catch(e){return null}}
+function save(){try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}}
+const $=s=>document.querySelector(s);
+const app=$('#app');
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const color=i=>COLORS[i%COLORS.length];
+const av=(n,i)=>`<span class="av" style="background:${color(i)}">${esc(([...n].find(c=>!'เแโใไ'.includes(c)))||'?')}</span>`;
+const rnd=n=>Math.floor(Math.random()*n);
+function buzz(p){try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}}
+let actx;
+function beep(f=880,d=.15,n=1){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+  for(let k=0;k<n;k++){const o=actx.createOscillator(),g=actx.createGain();o.frequency.value=f;o.connect(g);g.connect(actx.destination);
+  const t=actx.currentTime+k*(d+.08);g.gain.setValueAtTime(.25,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.start(t);o.stop(t+d)}}catch(e){}}
+async function keepAwake(on){try{if(on&&'wakeLock' in navigator){wakeLock=await navigator.wakeLock.request('screen')}else if(!on&&wakeLock){wakeLock.release();wakeLock=null}}catch(e){}}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&tick)keepAwake(true)});
+function render(html){app.innerHTML=`<div class="fade grow" style="display:flex;flex-direction:column">${html}</div>`;window.scrollTo(0,0)}
+function fmt(s){s=Math.max(0,Math.ceil(s));return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`}
+function stopTick(){clearInterval(tick);tick=null;keepAwake(false)}
+
+// ===== Screens =====
+function home(){
+  stopTick();
+  const total=Object.values(S.scores).reduce((a,b)=>a+b,0);
+  render(`
+    <div class="grow"></div>
+    <div class="center" style="font-size:5rem">🕵️</div>
+    <h1>ตัว<span>แฝง</span></h1>
+    <p class="sub">เกมทายคำ + หาคนใน สำหรับ 4–10 คน<br>ใช้มือถือเครื่องเดียว ส่งต่อกันเล่น</p>
+    <div class="grow"></div>
+    <button class="btn" onclick="setup()">เริ่มเล่น</button>
+    ${total?`<button class="btn ghost" onclick="scoreboard()">ตารางคะแนน</button>`:''}
+    <button class="btn ghost" onclick="rules()">วิธีเล่น</button>
+  `);
+}
+
+function rules(){
+  render(`
+    <div class="toprow"><button class="icbtn" onclick="home()">← กลับ</button></div>
+    <h2>วิธีเล่น</h2>
+    <div class="card">
+      <p style="margin-top:0"><b>บทบาท</b></p>
+      <p>👑 <b>ผู้คุมเกม</b> (เปิดเผย) — รู้คำลับ ตอบได้แค่ ใช่ / ไม่ใช่ / ไม่รู้<br>
+      🕵️ <b>ตัวแฝง</b> (ลับ) — รู้คำลับ แอบชี้นำให้ทุกคนทายถูก<br>
+      🙋 <b>ชาวบ้าน</b> — ไม่รู้คำ ต้องทายคำ และจับตัวแฝง</p>
+    </div>
+    <div class="card"><ol>
+      <li>ใส่ชื่อผู้เล่น แล้วส่งมือถือวนกันดูบทบาท (กดค้างเพื่อดู ปล่อยเพื่อซ่อน)</li>
+      <li><b>ช่วงทายคำ:</b> ทุกคน (รวมตัวแฝง) ถามคำถามใช่/ไม่ใช่ ให้ผู้คุมเกมตอบ ทายให้ถูกก่อนหมดเวลา</li>
+      <li>ถ้าหมดเวลา → <b>ทุกคนแพ้</b> (รวมตัวแฝง)</li>
+      <li>ถ้าทายถูก → <b>ช่วงสืบ:</b> คุยกันว่าใครดูรู้มากเกินไป เวลาเท่ากับที่ใช้ทายคำ</li>
+      <li>โหวตพร้อมกัน (นับ 3 แล้วชี้) แล้วให้ผู้คุมเกมกดคะแนนโหวตในเครื่อง</li>
+      <li>ถ้าคนที่โดนโหวตมากสุดคือตัวแฝง → <b>ผู้คุมเกม + ชาวบ้านชนะ</b> ไม่ใช่ → <b>ตัวแฝงชนะ</b></li>
+    </ol></div>
+    <div class="card hint">💡 ตัวแฝงห้ามรีบเกินไป! ถ้าชี้นำแรงเกินจะโดนจับได้ ส่วนชาวบ้านต้องจับตาคนที่ถามคำถามแม่นผิดปกติ</div>
+    <button class="btn" onclick="setup()">เข้าใจแล้ว เริ่มเลย</button>
+  `);
+}
+
+function setup(){
+  const P=S.players;
+  render(`
+    <div class="toprow"><button class="icbtn" onclick="home()">← กลับ</button><span class="pill">${P.length} คน</span></div>
+    <h2>ตั้งค่าเกม</h2>
+    <div class="card">
+      <p class="lbl">ผู้เล่น (อย่างน้อย 4 คน)</p>
+      <ul class="plist">${P.map((n,i)=>`<li>${av(n,i)}<span>${esc(n)}</span><button class="x" onclick="delP(${i})">×</button></li>`).join('')||'<li class="hint">ยังไม่มีผู้เล่น</li>'}</ul>
+      <form class="row" onsubmit="addP(event)" style="gap:8px">
+        <input type="text" id="pn" placeholder="ชื่อผู้เล่น" maxlength="14" autocomplete="off" enterkeyhint="done">
+        <button class="btn" style="margin:0;flex:0 0 72px;padding:12px">เพิ่ม</button>
+      </form>
+    </div>
+    <div class="card">
+      <p class="lbl">หมวดคำ</p>
+      <div class="chips">${Object.keys(WORDS).map(c=>`<button class="chip ${S.cats.includes(c)?'on':''}" onclick="togCat('${c}')">${c}</button>`).join('')}</div>
+    </div>
+    <div class="card stepper">
+      <span class="lbl" style="margin:0">เวลาทายคำ</span>
+      <div class="row" style="align-items:center;flex:0 0 auto;gap:14px">
+        <button onclick="setMin(-1)">−</button><b>${S.minutes} นาที</b><button onclick="setMin(1)">+</button>
+      </div>
+    </div>
+    <div class="grow"></div>
+    <button class="btn" ${P.length<4||!S.cats.length?'disabled':''} onclick="newRound()">${P.length<4?`เพิ่มผู้เล่นอีก ${4-P.length} คน`:'แจกบทบาท →'}</button>
+  `);
+}
+function addP(e){e.preventDefault();const v=$('#pn').value.trim();if(!v)return;
+  if(S.players.includes(v)){alert('ชื่อซ้ำ');return}
+  if(S.players.length>=12){alert('สูงสุด 12 คน');return}
+  S.players.push(v);save();setup();setTimeout(()=>$('#pn')&&$('#pn').focus(),30)}
+function delP(i){const n=S.players.splice(i,1)[0];delete S.scores[n];save();setup()}
+function togCat(c){S.cats=S.cats.includes(c)?S.cats.filter(x=>x!==c):[...S.cats,c];save();setup()}
+function setMin(d){S.minutes=Math.min(10,Math.max(2,S.minutes+d));save();setup()}
+
+function pickWord(){
+  const pool=S.cats.flatMap(c=>WORDS[c].map(w=>[c,w])).filter(([,w])=>!S.used.includes(w));
+  if(!pool.length){S.used=[];return pickWord()}
+  const [cat,w]=pool[rnd(pool.length)];S.used.push(w);save();return {cat,word:w};
+}
+function newRound(){
+  const P=S.players,n=P.length;
+  S.masterIdx=(S.masterIdx+1)%n; // master rotates
+  let ins; do{ins=rnd(n)}while(ins===S.masterIdx);
+  const roles=P.map((_,i)=>i===S.masterIdx?'master':i===ins?'insider':'common');
+  G={roles,master:S.masterIdx,insider:ins,...pickWord(),turn:0,votes:P.map(()=>0)};
+  save();passTo();
+}
+
+// pass-and-play role reveal; master goes first
+function order(){const n=S.players.length;return [...Array(n)].map((_,k)=>(G.master+k)%n)}
+function passTo(){
+  const o=order();
+  if(G.turn>=o.length) return ready();
+  const i=o[G.turn],n=S.players[i];
+  render(`
+    <div class="toprow"><button class="icbtn" onclick="if(confirm('ยกเลิกรอบนี้?'))home()">✕ ยกเลิก</button><span class="pill">${G.turn+1}/${o.length}</span></div>
+    <div class="grow"></div>
+    <p class="sub" style="margin-bottom:.4em">ส่งมือถือให้</p>
+    <div class="center">${av(n,i).replace('class="av"','class="av" style="width:90px;height:90px;font-size:2.4rem;margin:0 auto;background:'+color(i)+'"')}</div>
+    <div class="big">${esc(n)}</div>
+    <p class="sub">อย่าให้คนอื่นเห็นหน้าจอนะ!</p>
+    <div class="grow"></div>
+    <button class="btn" onclick="reveal()">ฉันคือ ${esc(n)} ✋</button>
+  `);
+}
+function reveal(){
+  const i=order()[G.turn],r=G.roles[i],R=ROLE[r];
+  let seen=false;
+  render(`
+    <h2>${esc(S.players[i])}</h2>
+    <div class="hold" id="hold"><div><div style="font-size:3rem">👆</div><b style="color:var(--text)">กดค้างไว้เพื่อดูบทบาท</b><br>ปล่อยนิ้วเพื่อซ่อน</div></div>
+    <div id="rv" style="display:none" class="role ${R.cls}">
+      <div class="ic">${R.ic}</div><div class="nm">${R.nm}</div>
+      ${r!=='common'?`<div class="pill" style="background:#0004;border:0">หมวด: ${esc(G.cat)}</div><div class="word">${esc(G.word)}</div>`:''}
+      <p style="margin:.8em 0 0;font-size:.95rem">${R.desc}</p>
+    </div>
+    ${r==='master'?`<button class="btn ghost" id="swap" style="display:none" onclick="swapWord()">🔄 เปลี่ยนคำ (คำยาก/ไม่รู้จัก)</button>`:''}
+    <div class="grow"></div>
+    <button class="btn" id="nx" disabled onclick="G.turn++;passTo()">ดูแล้ว ส่งต่อ →</button>
+  `);
+  const h=$('#hold'),rv=$('#rv');
+  const show=e=>{e.preventDefault();h.style.display='none';rv.style.display='block';buzz(20);
+    if(!seen){seen=true;$('#nx').disabled=false;const s=$('#swap');if(s)s.style.display='block'}};
+  const hide=()=>{rv.style.display='none';h.style.display='grid'};
+  h.addEventListener('pointerdown',show);
+  rv.addEventListener('pointerup',hide);rv.addEventListener('pointercancel',hide);rv.addEventListener('pointerleave',hide);
+  document.onpointerup=hide;
+}
+function swapWord(){Object.assign(G,pickWord());reveal()}
+
+function ready(){
+  const m=S.players[G.master];
+  render(`
+    <div class="grow"></div>
+    <div class="center" style="font-size:4rem">👑</div>
+    <h2>ทุกคนรู้บทบาทแล้ว</h2>
+    <p class="sub">ส่งมือถือคืนให้ผู้คุมเกม <b style="color:var(--acc)">${esc(m)}</b><br>หมวดคำ: <b>${esc(G.cat)}</b></p>
+    <div class="card hint">ผู้คุมเกมตอบได้แค่ "ใช่ / ไม่ใช่ / ไม่รู้" — เมื่อมีคนทายถูก ให้กดปุ่ม "ทายถูกแล้ว!" ทันที</div>
+    <div class="grow"></div>
+    <button class="btn" onclick="startGuess()">เริ่มจับเวลา ${S.minutes} นาที ▶</button>
+  `);
+}
+
+function timerScreen({title,sub,total,onEnd,buttons}){
+  const end=Date.now()+total*1000;let last=-1;
+  render(`
+    <div class="toprow"><span class="pill">${title}</span><span class="pill">หมวด: ${esc(G.cat)}</span></div>
+    <div class="grow"></div>
+    <p class="sub" style="margin:0">${sub}</p>
+    <div class="timer" id="tm">${fmt(total)}</div>
+    <div class="bar"><i id="br" style="width:100%"></i></div>
+    <div class="grow"></div>
+    ${buttons}
+  `);
+  keepAwake(true);clearInterval(tick);
+  const f=()=>{const left=(end-Date.now())/1000,s=Math.ceil(left);
+    const tm=$('#tm'),br=$('#br');if(!tm)return stopTick();
+    tm.textContent=fmt(left);br.style.width=Math.max(0,left/total*100)+'%';
+    tm.classList.toggle('warn',left<=30);
+    if(s!==last){last=s;if(s<=10&&s>0){beep(660,.08)}if(s===30)buzz(200)}
+    if(left<=0){stopTick();beep(440,.4,3);buzz([300,100,300]);onEnd()}};
+  G.endAt=end;G.total=total;f();tick=setInterval(f,200);
+}
+function startGuess(){
+  timerScreen({title:'ช่วงทายคำ',sub:'ถามคำถาม ใช่ / ไม่ใช่',total:S.minutes*60,onEnd:timeUp,
+    buttons:`<button class="btn good" onclick="guessed()">🎉 ทายถูกแล้ว!</button>
+      <button class="btn ghost" onclick="if(confirm('ยอมแพ้? ทุกคนจะแพ้รอบนี้'))(stopTick(),timeUp())">ยอมแพ้</button>`});
+}
+function timeUp(){
+  stopTick();
+  result({title:'⏰ หมดเวลา!',sub:'ไม่มีใครทายถูก — ทุกคนแพ้ (รวมทั้งตัวแฝง)',winners:[]});
+}
+function guessed(){
+  const used=Math.max(30,Math.round(G.total-(G.endAt-Date.now())/1000));
+  stopTick();beep(990,.12,2);buzz(80);G.used=used;
+  render(`
+    <h2>🎉 ทายถูก!</h2>
+    <p class="sub">คำคือ <b style="color:var(--acc);font-size:1.3rem">${esc(G.word)}</b> · ใช้เวลา ${fmt(used)}</p>
+    <div class="card">
+      <p class="lbl">ใครเป็นคนทายถูก? (ไม่บังคับ)</p>
+      <div class="grid">${S.players.map((n,i)=>i===G.master?'':`<button class="pick" data-i="${i}" onclick="G.guesser=${i};document.querySelectorAll('.pick').forEach(b=>b.classList.toggle('on',+b.dataset.i===${i}))">${av(n,i)}${esc(n)}</button>`).join('')}</div>
+    </div>
+    <div class="card hint">ต่อไปคือช่วงสืบหาตัวแฝง: คุยกันว่าใครดูรู้คำมากเกินไป มีเวลา ${fmt(used)} (เท่ากับเวลาที่ใช้ทาย)</div>
+    <div class="grow"></div>
+    <button class="btn" onclick="startDiscuss()">เริ่มช่วงสืบ 🔍</button>
+    <button class="btn ghost" onclick="vote()">ข้ามไปโหวตเลย</button>
+  `);
+}
+function startDiscuss(){
+  timerScreen({title:'ช่วงสืบ',sub:'ใครคือตัวแฝง? 🤔',total:G.used,onEnd:vote,
+    buttons:`<button class="btn" onclick="stopTick();vote()">พร้อมโหวตแล้ว →</button>`});
+}
+function vote(){
+  stopTick();
+  const tot=G.votes.reduce((a,b)=>a+b,0);
+  render(`
+    <h2>🗳️ โหวตหาตัวแฝง</h2>
+    <p class="sub" style="margin-bottom:.8em">นับ 1-2-3 แล้วทุกคนชี้พร้อมกัน<br>จากนั้นผู้คุมเกมกดเพิ่มคะแนนโหวตให้แต่ละคน</p>
+    <div class="grid">${S.players.map((n,i)=>`<button class="pick ${G.votes[i]?'on':''}" onclick="G.votes[${i}]++;buzz(10);vote()">${av(n,i)}${esc(n)}${i===G.master?' 👑':''}<span class="cnt">${'●'.repeat(G.votes[i])||'0 โหวต'}</span></button>`).join('')}</div>
+    <div class="row" style="margin-top:6px"><button class="btn ghost" onclick="G.votes=G.votes.map(()=>0);vote()">ล้าง</button>
+    <button class="btn" ${tot?'':'disabled'} onclick="judge()">เปิดผล (${tot} โหวต)</button></div>
+    <div class="grow"></div>
+  `);
+}
+function judge(){
+  const max=Math.max(...G.votes),top=G.votes.map((v,i)=>v===max?i:-1).filter(i=>i>=0);
+  if(top.length>1){
+    render(`
+      <h2>⚖️ คะแนนเสมอ!</h2>
+      <p class="sub">ผู้คุมเกม <b>${esc(S.players[G.master])}</b> ตัดสินว่าจะชี้ใคร</p>
+      <div class="grid">${top.map(i=>`<button class="pick" onclick="accuse(${i})">${av(S.players[i],i)}${esc(S.players[i])}</button>`).join('')}</div>
+      <div class="grow"></div>`);
+    return;
+  }
+  accuse(top[0]);
+}
+function accuse(i){
+  const P=S.players,acc=P[i],insName=P[G.insider];
+  render(`
+    <div class="grow"></div>
+    <p class="sub">ทุกคนชี้ไปที่</p>
+    <div class="big">${esc(acc)}</div>
+    <p class="sub">ตัวแฝงตัวจริงคือ...</p>
+    <div class="hold" id="drum" style="height:160px"><div><div style="font-size:2.5rem">🥁</div><b style="color:var(--text)">แตะเพื่อเปิดเผย</b></div></div>
+    <div class="grow"></div>
+  `);
+  $('#drum').onclick=()=>{
+    const caught=i===G.insider;
+    const winners=caught?P.map((_,k)=>k).filter(k=>k!==G.insider):[G.insider];
+    result({title:caught?'✅ จับได้แล้ว!':'😈 ตัวแฝงรอด!',
+      sub:caught?`${esc(insName)} คือตัวแฝงจริงๆ — ผู้คุมเกมและชาวบ้านชนะ`:`ตัวแฝงตัวจริงคือ <b>${esc(insName)}</b> — ตัวแฝงชนะ!`,winners,big:true});
+  };
+}
+function result({title,sub,winners}){
+  stopTick();
+  const P=S.players;
+  winners.forEach(k=>{S.scores[P[k]]=(S.scores[P[k]]||0)+(k===G.insider?3:1)});save();
+  if(winners.length)beep(880,.12,3);
+  render(`
+    <div class="win">${title}</div>
+    <p class="sub">${sub}</p>
+    <div class="card center">
+      <p class="lbl" style="margin:0">คำลับคือ</p>
+      <div style="font-size:2rem;font-weight:800;color:var(--acc)">${esc(G.word)}</div>
+      <div class="row" style="margin-top:10px">
+        <div><span class="pill">👑 ${esc(P[G.master])}</span></div>
+        <div><span class="pill" style="border-color:var(--bad)">🕵️ ${esc(P[G.insider])}</span></div>
+      </div>
+    </div>
+    ${scoreTable(winners)}
+    <div class="grow"></div>
+    <button class="btn" onclick="newRound()">เล่นรอบต่อไป ↻</button>
+    <button class="btn ghost" onclick="setup()">แก้ไขผู้เล่น / ตั้งค่า</button>
+  `);
+}
+function scoreTable(w=[]){
+  const P=S.players.map((n,i)=>[n,i,S.scores[n]||0]).sort((a,b)=>b[2]-a[2]);
+  return `<div class="card"><p class="lbl">คะแนนรวม <span class="hint">(ชนะ +1 · ตัวแฝงชนะ +3)</span></p><ul class="plist score">${
+    P.map(([n,i,s])=>`<li>${av(n,i)}<span style="flex:1">${esc(n)} ${w.includes(i)?'<span style="color:var(--good)">▲</span>':''}</span><b>${s}</b></li>`).join('')}</ul></div>`;
+}
+function scoreboard(){
+  render(`<div class="toprow"><button class="icbtn" onclick="home()">← กลับ</button></div><h2>ตารางคะแนน</h2>${scoreTable()}
+    <div class="grow"></div><button class="btn ghost" onclick="if(confirm('ล้างคะแนนทั้งหมด?')){S.scores={};save();home()}">ล้างคะแนน</button>`);
+}
+window.addEventListener('beforeunload',e=>{if(tick){e.preventDefault();e.returnValue=''}});
+home();
+</script>
+</body>
+</html>
